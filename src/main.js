@@ -1,7 +1,6 @@
 // with polyfills
 import 'core-js/stable'
 import 'regenerator-runtime/runtime'
-
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
@@ -10,7 +9,6 @@ import i18n from './locales'
 import { VueAxios } from './utils/request'
 import ProLayout, { PageHeaderWrapper } from '@ant-design-vue/pro-layout'
 import themePluginConfig from '../config/themePluginConfig'
-
 // mock
 // WARNING: `mockjs` NOT SUPPORT `IE` PLEASE DO NOT USE IN `production` ENV.
 import './mock'
@@ -31,12 +29,11 @@ Vue.component('page-container', PageHeaderWrapper)
 Vue.component('page-header-wrapper', PageHeaderWrapper)
 
 window.umi_plugin_ant_themeVar = themePluginConfig.theme
-
 new Vue({
   router,
   store,
   i18n,
   // init localstorage, vuex, Logo message
   created: bootstrap,
-  render: h => h(App)
+  render: (h) => h(App),
 }).$mount('#app')

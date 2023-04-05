@@ -5,13 +5,13 @@ const GitRevisionPlugin = require('git-revision-webpack-plugin')
 const GitRevision = new GitRevisionPlugin()
 const buildDate = JSON.stringify(new Date().toLocaleString())
 const createThemeColorReplacerPlugin = require('./config/plugin.config')
-
-function resolve (dir) {
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin')
+function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
 // check Git
-function getGitHash () {
+function getGitHash() {
   try {
     return GitRevision.version()
   } catch (e) {}
@@ -26,7 +26,7 @@ const assetsCDN = {
     vue: 'Vue',
     'vue-router': 'VueRouter',
     vuex: 'Vuex',
-    axios: 'axios'
+    axios: 'axios',
   },
   css: [],
   // https://unpkg.com/browse/vue@2.6.10/
@@ -34,8 +34,8 @@ const assetsCDN = {
     '//cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js',
     '//cdn.jsdelivr.net/npm/vue-router@3.5.1/dist/vue-router.min.js',
     '//cdn.jsdelivr.net/npm/vuex@3.1.1/dist/vuex.min.js',
-    '//cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js'
-  ]
+    '//cdn.jsdelivr.net/npm/axios@0.21.1/dist/axios.min.js',
+  ],
 }
 
 // vue.config.js
@@ -46,53 +46,64 @@ const vueConfig = {
       // Ignore all locale files of moment.js
       new webpack.IgnorePlugin({
         contextRegExp: /^\.\/locale$/,
-        resourceRegExp: /moment$/
+        resourceRegExp: /moment$/,
       }),
       new webpack.DefinePlugin({
         APP_VERSION: `"${packageJson.version}"`,
         GIT_HASH: JSON.stringify(getGitHash()),
-        BUILD_DATE: buildDate
-      })
-    ]
+        BUILD_DATE: buildDate,
+      }),
+    ],
     // en_US: `if prod, add externals`
     // zh_CN: `这里是用来控制编译忽略外部依赖的，与 config.plugin('html') 配合可以编译时引入外部CDN文件依赖`
     // externals: isProd ? assetsCDN.externals : {}
   },
-
-  chainWebpack: config => {
+  configureWebpack: {
+    resolve: {
+      alias: {},
+      fallback: {
+        //其他的如果不启用可以用 keyname :false，例如：crypto:false,
+        crypto: require.resolve('crypto-browserify'),
+        stream: require.resolve('stream-browserify'),
+      },
+    },
+    plugins: [new NodePolyfillPlugin()],
+  },
+  chainWebpack: (config) => {
     config.resolve.alias.set('@$', resolve('src'))
 
     // fixed svg-loader by https://github.com/damianstasik/vue-svg-loader/issues/185#issuecomment-1126721069
-		const svgRule = config.module.rule('svg')
-		// Remove regular svg config from root rules list
-		config.module.rules.delete('svg')
+    const svgRule = config.module.rule('svg')
+    // Remove regular svg config from root rules list
+    config.module.rules.delete('svg')
 
-		config.module.rule('svg')
-			// Use svg component rule
-			.oneOf('svg_as_component')
-				.resourceQuery(/inline/)
-				.test(/\.(svg)(\?.*)?$/)
-				.use('babel-loader')
-					.loader('babel-loader')
-					.end()
-				.use('vue-svg-loader')
-					.loader('vue-svg-loader')
-					.options({
-						svgo: {
-							plugins: [
-								{ prefixIds: true },
-								{ cleanupIDs: true },
-								{ convertShapeToPath: false },
-								{ convertStyleToAttrs: true }
-							]
-						}
-					})
-					.end()
-				.end()
-			// Otherwise use original svg rule
-			.oneOf('svg_as_regular')
-				.merge(svgRule.toConfig())
-				.end()
+    config.module
+      .rule('svg')
+      // Use svg component rule
+      .oneOf('svg_as_component')
+      .resourceQuery(/inline/)
+      .test(/\.(svg)(\?.*)?$/)
+      .use('babel-loader')
+      .loader('babel-loader')
+      .end()
+      .use('vue-svg-loader')
+      .loader('vue-svg-loader')
+      .options({
+        svgo: {
+          plugins: [
+            { prefixIds: true },
+            { cleanupIDs: true },
+            { convertShapeToPath: false },
+            { convertStyleToAttrs: true },
+          ],
+        },
+      })
+      .end()
+      .end()
+      // Otherwise use original svg rule
+      .oneOf('svg_as_regular')
+      .merge(svgRule.toConfig())
+      .end()
 
     // en_US: If prod is on assets require on cdn
     // zh_CN: 如果是 prod 模式，则引入 CDN 依赖文件，有需要减少包大小请自行解除依赖
@@ -113,17 +124,17 @@ const vueConfig = {
 
           // 'primary-color': '#F5222D',
           // 'link-color': '#F5222D',
-          'border-radius-base': '2px'
+          'border-radius-base': '2px',
         },
         // DO NOT REMOVE THIS LINE
-        javascriptEnabled: true
-      }
-    }
+        javascriptEnabled: true,
+      },
+    },
   },
 
   devServer: {
     // development server port 8000
-    port: 8000
+    port: 8000,
     // If you want to turn on the proxy, please remove the mockjs /src/main.jsL11
     // proxy: {
     //   '/api': {
@@ -132,13 +143,27 @@ const vueConfig = {
     //     changeOrigin: true
     //   }
     // }
+    proxy: {
+      '/api': {
+        // target: 'http://43.139.47.5:8081',
+        target: 'http://127.0.0.1:8081',
+        ws: false,
+        changeOrigin: true,
+      },
+      '/client': {
+        target: 'http://127.0.0.1:2002',
+        ws: false,
+        changeOrigin: true,
+        pathRewrite: { '^/client': '/' },
+      },
+    },
   },
 
   // disable source map in production
   productionSourceMap: false,
-  lintOnSave: undefined,
+  lintOnSave: false,
   // babel-loader no-ignore node_modules/*
-  transpileDependencies: []
+  transpileDependencies: [],
 }
 
 // preview.pro.loacg.com only do not use in your production;
@@ -146,5 +171,4 @@ if (process.env.VUE_APP_PREVIEW === 'true') {
   // add `ThemeColorReplacer` plugin to webpack plugins
   vueConfig.configureWebpack.plugins.push(createThemeColorReplacerPlugin())
 }
-
 module.exports = vueConfig

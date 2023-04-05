@@ -1,88 +1,47 @@
 <template>
   <!-- hidden PageHeaderWrapper title demo -->
   <page-header-wrapper :title="false" :content="$t('form.basic-form.basic.description')">
-    <a-card :body-style="{padding: '24px 32px'}" :bordered="false">
-      <a-form @submit="handleSubmit" :form="form">
+    <a-card :body-style="{ padding: '24px 32px' }" :bordered="false">
+      <a-form @submit="handleSubmit" :form="form" method="post">
         <a-form-item
           :label="$t('form.basic-form.title.label')"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-          <a-input
-            v-decorator="[
-              'name',
-              {rules: [{ required: true, message: $t('form.basic-form.title.required') }]}
-            ]"
-            name="name"
-            :placeholder="$t('form.basic-form.title.placeholder')" />
+          :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+          :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+        >
+          <a-input v-decorator="['name']" name="name" :placeholder="$t('请给隧道起个名字')" />
         </a-form-item>
         <a-form-item
           :label="$t('form.basic-form.date.label')"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-          <a-range-picker
-            name="buildTime"
-            style="width: 100%"
-            v-decorator="[
-              'buildTime',
-              {rules: [{ required: true, message: $t('form.basic-form.date.required') }]}
-            ]" />
-        </a-form-item>
-        <a-form-item
-          :label="$t('form.basic-form.goal.label')"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-          <a-textarea
-            rows="4"
-            :placeholder="$t('form.basic-form.goal.placeholder')"
-            v-decorator="[
-              'description',
-              {rules: [{ required: true, message: $t('form.basic-form.goal.required') }]}
-            ]" />
-        </a-form-item>
-        <a-form-item
-          :label="$t('form.basic-form.standard.label')"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-          <a-textarea
-            rows="4"
-            :placeholder="$t('form.basic-form.standard.placeholder')"
-            v-decorator="[
-              'type',
-              {rules: [{ required: true, message: $t('form.basic-form.standard.required') }]}
-            ]" />
-        </a-form-item>
-        <a-form-item
-          :label="$t('form.basic-form.client.label')"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-          <a-input
-            :placeholder="$t('form.basic-form.client.placeholder')"
-            v-decorator="[
-              'customer',
-              {rules: [{ required: true, message: $t('form.basic-form.client.required') }]}
-            ]" />
-        </a-form-item>
-        <a-form-item
-          :label="$t('form.basic-form.invites.label')"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }"
-          :required="false"
+          :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+          :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
         >
-          <a-input :placeholder="$t('form.basic-form.invites.placeholder')" />
+          <a-range-picker name="buildTime" style="width: 100%" v-decorator="['buildTime']" />
         </a-form-item>
         <a-form-item
-          :label="$t('form.basic-form.weight.label')"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }"
-          :required="false"
+          :label="$t('内网地址')"
+          :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+          :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
         >
-          <a-input-number :min="0" :max="100" />
-          <span> %</span>
+          <a-textarea rows="1" v-decorator="['inAddress']" />
+        </a-form-item>
+        <a-form-item
+          :label="$t('内网端口')"
+          :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+          :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+        >
+          <a-textarea rows="1" v-decorator="['inPort']" />
+        </a-form-item>
+        <a-form-item
+          :label="$t('外网地址')"
+          :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+          :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
+        >
+          <a-textarea rows="1" v-decorator="['outAddress']" />
         </a-form-item>
         <a-form-item
           :label="$t('form.basic-form.public.label')"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }"
+          :labelCol="{ lg: { span: 7 }, sm: { span: 7 } }"
+          :wrapperCol="{ lg: { span: 10 }, sm: { span: 17 } }"
           :required="false"
           :help="$t('form.basic-form.label.help')"
         >
@@ -91,20 +50,9 @@
             <a-radio :value="2">{{ $t('form.basic-form.radio.partially-public') }}</a-radio>
             <a-radio :value="3">{{ $t('form.basic-form.radio.private') }}</a-radio>
           </a-radio-group>
-          <a-form-item v-show="form.getFieldValue('target') === 2">
-            <a-select mode="multiple">
-              <a-select-option value="4">{{ $t('form.basic-form.option.A') }}</a-select-option>
-              <a-select-option value="5">{{ $t('form.basic-form.option.B') }}</a-select-option>
-              <a-select-option value="6">{{ $t('form.basic-form.option.C') }}</a-select-option>
-            </a-select>
-          </a-form-item>
         </a-form-item>
-        <a-form-item
-          :wrapperCol="{ span: 24 }"
-          style="text-align: center"
-        >
+        <a-form-item :wrapperCol="{ span: 24 }" style="text-align: center">
           <a-button htmlType="submit" type="primary">{{ $t('form.basic-form.form.submit') }}</a-button>
-          <a-button style="margin-left: 8px">{{ $t('form.basic-form.form.save') }}</a-button>
         </a-form-item>
       </a-form>
     </a-card>
@@ -112,23 +60,41 @@
 </template>
 
 <script>
+import { createPenetrate } from '@/api/client'
 export default {
   name: 'BaseForm',
-  data () {
+  data() {
     return {
-      form: this.$form.createForm(this)
+      form: this.$form.createForm(this),
+      name: '',
+      inAddress: '',
+      inPort: Number,
+      outAddress: '',
     }
   },
   methods: {
     // handler
-    handleSubmit (e) {
+    handleSubmit(e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
-        if (!err) {
-          console.log('Received values of form: ', values)
-        }
+        // if (!err) {
+        //   console.log('Received values of form: ', values)
+        // }
+        // let param = new URLSearchParams()
+        // let inaddress = this.form.getFieldValue('inAddress')
+        // let inport = this.form.getFieldValue('inPort')
+        // let outaddress = this.form.getFieldValue('outAddress')
+        // let name = this.form.getFieldValue('name')
+        // param.append('inPort', inport)
+        // param.append('inaddress', inaddress)
+        // param.append('outaddress', outaddress)
+        // param.append('name', name)
+        // this.$http.post('http://localhost:1998/form/base-form', param).then((response) => {
+        //   alert('提交成功')
+        // })
+        createPenetrate({}).then((res) => {})
       })
-    }
-  }
+    },
+  },
 }
 </script>
